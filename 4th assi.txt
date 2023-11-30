@@ -1,0 +1,122 @@
+execv
+prog1
+#include <stdio.h>
+#include <unistd.h>
+#include <stdlib.h>
+
+int main(int argc, char *argv[]) {
+    // Print the PID of prog1.c
+    printf("PID of prog1.c = %d\n", getpid());
+
+    // Set up arguments for execv
+    char *args[] = {"hello", "world", NULL};
+
+    // Replace the current process with prog2 using execv
+    execv("./prog2", args);
+
+    // This line won't be executed if execv is successful
+    printf("Back to prog1.c\n");
+
+    return 0;
+}
+
+pog2.c
+#include <stdio.h>
+#include <unistd.h>
+#include <stdlib.h>
+
+int main(int argc, char *argv[]) {
+    // Print a message indicating that we are in program 2
+    printf("We are in program 2\n");
+
+    // Print the PID of program 2
+    printf("PID of program 2 is %d\n", getpid());
+
+    return 0;
+}
+
+
+
+
+
+
+
+write copy read
+
+#include <stdio.h>
+#include <fcntl.h>
+#include <unistd.h>  // Added for read and write functions
+
+int main() {
+    int fd;  // File descriptor for the opened file
+    char buffer[80];  // Buffer to store read data
+    static char message[] = "Hello";  // Message to be written to the file
+
+    // Open myfile.txt with read/write access
+    fd = open("myfile.txt", O_RDWR);
+
+    // Check if the file was opened successfully
+    if (fd != -1) {
+        printf("myfile.txt opened with read/write access\n");
+
+        // Write the message to the file
+        write(fd, message, sizeof(message));
+
+        // Move the file cursor to the beginning of the file
+        lseek(fd, 0, SEEK_SET);
+
+        // Read data from the file into the buffer
+        read(fd, buffer, sizeof(message));
+
+        // Print the read data from the file
+        printf("%s was written to myfile.txt\n", buffer);
+
+        // Close the file
+        close(fd);
+    }
+
+    return 0;
+}
+
+
+
+
+WAIT
+#include <stdio.h>
+#include <sys/types.h>
+#include <unistd.h>
+main () {
+int pid = fork();
+if (pid < 0) {
+printf("Fork failed.\n");
+
+} else if (pid == 0) {
+printf("Child process, PID: %d\n", getpid());
+printf("Child is exiting.\n");
+exit(0);
+} else {
+printf("Parent process, Child PID: %d\n", pid);
+printf("Parent is waiting for the child to exit...\n");
+wait(NULL);
+printf("Parent's wait is done.\n");
+}
+}
+
+
+
+
+
+FORK
+#include <stdio.h>
+#include <sys/types.h>
+#include <unistd.h>
+main() {
+int pid = fork();
+if (pid < 0) {
+printf("Fork failed.\n");
+} else if (pid == 0) {
+printf("In Child process");
+} else {
+printf("In Parent process");
+}
+}
