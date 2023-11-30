@@ -1,0 +1,165 @@
+PRODUCER
+#include<stdio.h> 
+#include<stdlib.h>
+#include<string.h>
+#include<fcntl.h>
+#include<sys/shm.h>
+#include<sys/stat.h>
+#include<sys/mman.h>
+#include<unistd.h>
+int main()(
+const int SIZE = 4096;
+const char* name = "0S";
+const char* message_0 = "Hello";
+const char* message_1 = "World"
+int shm_fd;
+void* ptr;
+shm_fd = shm_open(name,O_CREAT|O_RDWR,0666);
+ftruncate(shm_fd,SIZE);
+ptr = mmap(O,SIZE,PROT_WRITE,MAP_SHARED,shm_fd,0);
+sprintf(ptr,"%s",message_0);
+ptr += strlen(message_0);
+sprintf(ptr,"%s" ,message_1);
+ptr += strlen(message_1);
+return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+CONSUMER
+
+#include<stdio.h>
+#include<stdlib.h>
+#include<fcntl.h>
+#include<sys/shm.h>
+#include<sys/stat.h>
+#include<sys/mman.h>
+int main(f
+const int SIZE = 4096;
+const char* name = "OS";
+int shm_fd;
+void* ptr;
+shm_fd = shm_open(name,O_RDONLY,0666);
+ptr = mmap(O,SIZE,PROT_READ,MAP_SHARED,shm_fd,0);
+printf("%s",(char*)ptr);
+shm_unlink(name);
+return 0;}
+
+IPC THROUGH PIPES
+
+
+#include<stdio.h>
+#include<unistd.h>
+#include<sys/types.h>
+#include<sys/wait.h>
+int main()f
+int fd[2] , n;
+char buffer[100];
+pid_t p;
+pipe(fd);
+p = fork();
+if(p > o)f
+printf("PARENT PASSING VALUE TO CHILD\n");
+write(fd[1],"hello\n",6);
+sleep(3);
+t
+else
+printf("CHILD PRINTING RECIEVED VALUE\n");
+P = read(fd[0]
+buffer
+100);
+printf("%s",buffer);
+write(1 , buffer , n);
+}
+}
+
+
+
+
+IPC THROUGH MESSAGE QUEUES
+WRITER
+#include <stdio.h>
+#include <sys/ipc.h>
+#include <sys/msg.h>
+#define MAX 10
+
+// Structure for the message buffer
+struct mesg_buffer {
+    long mesg_type;
+    char mesg_text[100];
+} message;
+
+int main() {
+    key_t key;
+    int msgid;
+
+    // ftok to generate a unique key
+    key = ftok("progfile", 65);
+
+    // msgget creates a message queue and returns its identifier
+    msgid = msgget(key, 0666 | IPC_CREAT);
+
+    // Set the message type to 1 and get user input to fill the message text
+    message.mesg_type = 1;
+    printf("Write Data : ");
+    fgets(message.mesg_text, MAX, stdin);
+
+    // msgsnd to send the message
+    msgsnd(msgid, &message, sizeof(message), 0);
+
+    // Display the sent message
+    printf("Data sent is: %s \n", message.mesg_text);
+
+    return 0;
+}
+
+
+
+READER PART
+
+#include <stdio.h>
+#include <sys/ipc.h>
+#include <sys/msg.h>
+
+// Structure for the message buffer
+struct mesg_buffer {
+    long mesg_type;
+    char mesg_text[100];
+} message;
+
+int main() {
+    key_t key;
+    int msgid;
+
+    // ftok to generate a unique key
+    key = ftok("progfile", 65);
+
+    // msgget creates a message queue and returns its identifier
+    msgid = msgget(key, 0666 | IPC_CREAT);
+
+    // msgrcv to receive the message
+    msgrcv(msgid, &message, sizeof(message), 1, 0);
+
+    // Display the received message
+    printf("Data Received is: %s \n", message.mesg_text);
+
+    // Destroy the message queue
+    msgctl(msgid, IPC_RMID, NULL);
+
+    return 0;
+}
+
